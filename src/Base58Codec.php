@@ -2,28 +2,25 @@
 namespace Muvon\KISS;
 
 class Base58Codec {
-  public static function checkEncode(string $binary): string {
+  public static function checkEncode(string $hex): string {
+    $binary = hex2bin($hex);
     $hash = hash('sha256', hash('sha256', $binary, true));
     $checksum = substr($hash, 0, 8);
     $hex = $binary . hex2bin($checksum);
     return static::encode($hex);
   }
 
-  public static function checkDecode(string $base58): string {
-    $address = static::decode($base58);
-    $size = strlen($address);
-    if ($size != 25) {
-      return false;
-    }
-    $checksum = substr($address, 21);
-    $address = substr($address, 0, 21);     
-    $hash = hash('sha256', hash('sha256', $address, true));
+  public static function checkDecode(string $base58add): string {
+    $binary = static::decode($base58add);
+    $checksum = substr($binary, -4);
+    $binary = substr($binary, 0, -4);
+    $hash = hash('sha256', hash('sha256', $binary, true));
     $checksum0 = substr($hash, 0, 8);
     $checksum1 = bin2hex($checksum);
     if (strcmp($checksum0, $checksum1)) {
       return false;
     }
-    return $address;
+    return bin2hex($binary);
   }
 
 
